@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Week 1 Starter — Canvas &amp; Clear Color</title>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    canvas { width: 100%; height: 100%; display: block; }
+  </style>
+</head>
+<body>
+  <canvas id="gl-canvas"></canvas>
+  <script>
+    //Find the canvas in the HTML document and get a WebGL2 drawing context from it
+    const canvas = document.getElementById("gl-canvas");
+    const gl = canvas.getContext("webgl2");
+
+    //Stop execution if WebGL2 is not available
+    if (!gl) {
+      throw new Error("WebGL2 is not available on this device/browser.");
+    }
+
+    //Resize the canvas to match the size it's displayed.
+    function resizeCanvasToDisplaySize() {
+      const dpr = window.devicePixelRatio || 1;
+      const width = Math.round(canvas.clientWidth * dpr);
+      const height = Math.round(canvas.clientHeight * dpr);
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+    }
+
+    //Three colors to cycle through.
+    const colors = [
+      [1.0, 0.0, 0.0, 1.0], // red
+      [0.0, 1.0, 0.0, 1.0], // green
+      [0.0, 0.0, 1.0, 1.0], // blue
+    ];
+
+    //Start with the first color in the array (red)
+    let colorIndex = 0;
+
+    //Keep track of fade begin time
+    let startTime = null;
+
+    //Each fade takes 1 second = 1000 milliseconds
+    const duration = 1000;
+
+    function animate(timestamp) {
+        //If this is the first frame, record the start time
+        if (startTime === null) {
+            startTime = timestamp;
+        }
+
+        //copied from template render function
+        resizeCanvasToDisplaySize();
+        gl.viewport(0, 0, canvas.width, canvas.height);
+
+        //Get starting color
+        const currentColor = colors[colorIndex];
+
+        //Get next color to fade to; % for wrap-around to beginning of array
+        const nextColor = colors[(colorIndex + 1) % colors.length];
+
+        //Calculate how far along we are in the fade (0.0 to 1.0)
+        const elapsed = timestamp - startTime;
+
+        //Convert to a number from 0 to 1
+        const progress = Math.min(elapsed / duration, 1.0);
+
+        //Calculate green value based on progress
+        const g = currentColor[1] + (nextColor[1] - currentColor[1]) * progress;
+
+        //Calculate red value based on progress
+        const r = currentColor[0] + (nextColor[0] - currentColor[0]) * progress;
+
+        //Calculate blue value based on progress
+        const b = currentColor[2] + (nextColor[2] - currentColor[2]) * progress;
+
+        //Tell WebGL which background color to use
+        gl.clearColor(r, g, b, 1.0);
+
+        //Do the action from the tutorial and draw the intermediate color.
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        //If the fade is complete, move to the next color and reset the start time
+        if (progress >= 1.0) {
+            //Next color is now current color
+            colorIndex = (colorIndex + 1) % colors.length;
+
+            //Start timing the next fade
+            startTime = timestamp;
+
+            //Get the RGB values of the new current color
+            const color = colors[colorIndex];
+
+            //Print them to console :D
+            console.log(`RGB: ${color[0]}, ${color[1]}, ${color[2]}`);
+    }
+    
+    // Please browser run my animate function.
+    requestAnimationFrame(animate);
+    }
+
+    //Start the animation!!
+    requestAnimationFrame(animate);
+    window.addEventListener("resize", animate);
+  </script>
+</body>
+</html>
