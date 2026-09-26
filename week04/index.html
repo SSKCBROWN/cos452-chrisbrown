@@ -91,11 +91,10 @@
 
     const uBrightness = gl.getUniformLocation(program, "u_brightness");
 
-    function render(t) {
+    function render() {
       const dpr = window.devicePixelRatio || 1;
       const w = Math.round(canvas.clientWidth * dpr);
       const h = Math.round(canvas.clientHeight * dpr);
-      const brightness = 0.75 + 0.25 * Math.sin(t * 0.003);
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
         canvas.height = h;
@@ -103,14 +102,13 @@
       gl.viewport(0, 0, canvas.width, canvas.height);
 
       gl.useProgram(program);
-      gl.uniform1f(uBrightness, brightness);
+      gl.uniform1f(uBrightness, 0.6);
       gl.clearColor(0.10, 0.12, 0.16, 1.0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
-      requestAnimationFrame(render);
     }
-
-    requestAnimationFrame(render);
+    window.addEventListener("resize", render);
+    render();
   </script>
 </body>
 </html>
